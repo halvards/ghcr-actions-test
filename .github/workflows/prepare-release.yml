@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Verify release
+name: Prepare release
 
 on:
   push:
     tags:
-    - 'v*-rc0'
+    - 'v*-rc*'
 
 jobs:
-  release:
+  prepare:
     runs-on: ubuntu-latest
     env:
       CGO_ENABLED: '0'
