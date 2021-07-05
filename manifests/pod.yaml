@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello
+spec:
+  containers:
+  - name: hello
+    image: ko://github.com/halvards/ghcr-actions-test # kpt-set: ${image}
