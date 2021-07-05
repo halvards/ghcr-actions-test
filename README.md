@@ -7,7 +7,7 @@ Experimenting with ghcr and actions.
 Download the binary for your platform:
 
 ```bash
-VERSION=v
+VERSION=v0.0.2
 
 curl -Lo ghcr-actions-test "https://github.com/halvards/ghcr-actions-test/releases/download/$VERSION/ghcr-actions-test_$(uname -s)_$(uname -m)"
 
