@@ -61,6 +61,7 @@ jobs:
 
     - name: Print env
       run: |
+        echo HOME=$HOME
         echo PATH=$PATH
         go env
 
