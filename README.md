@@ -16,6 +16,20 @@ chmod +x ghcr-actions-test
 ./ghcr-actions-test
 ```
 
+## Deploy
+
+Deploy the resources to your Kubernetes cluster:
+
+```sh
+VERSION=v0.0.8
+
+kpt pkg get https://github.com/halvards/ghcr-actions-test.git/manifests@$VERSION manifests
+
+kpt live init manifests
+
+kpt live apply manifests --reconcile-timeout=3m --output=table
+```
+
 ## Release
 
 See the [release instructions](docs/release.md).
