@@ -15,7 +15,7 @@
 3.  Push your commits and the tag:
 
     ```sh
-    git push --tags
+    git push --follow-tags
     ```
 
 If the release job fails and the release tag isn't created, you can fix the
