@@ -149,10 +149,14 @@ jobs:
           -- \
           "image=$REGISTRY/$IMAGE_REPO:$VERSION@${IMAGE_NAME_WITH_DIGEST##*@}"
 
-    - name: Commit and push to release branch with new image ref
+    - name: Update version in readme
       run: |
-        git add manifests
-        git commit -m "Update image version in manifest to $VERSION"
+        sed -i~ "s/VERSION=.*/VERSION=$VERSION/" README.md
+
+    - name: Commit and push to release branch with new version and image ref
+      run: |
+        git add README.md manifests
+        git commit -m "Update version in readme and manifest to $VERSION"
         git push --force origin release-$VERSION
 
     - name: Set release env vars
