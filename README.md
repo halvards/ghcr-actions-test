@@ -20,3 +20,7 @@ Display the version number:
 
 ```bash
 ./ghcr-actions-test
+
+## Release
+
+See the [release instructions](docs/release.md).

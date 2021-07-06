@@ -18,6 +18,9 @@ on:
   push:
     tags:
     - 'v*-rc*'
+    paths-ignore:
+    - '**.md'
+    - 'docs/**'
 
 jobs:
   release:
