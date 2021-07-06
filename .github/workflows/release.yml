@@ -156,6 +156,8 @@ jobs:
     - name: Commit and push to release branch with new version and image ref
       run: |
         git add README.md manifests
+        git config user.name github-actions
+        git config user.email github-actions@github.com
         git commit -m "Update version in readme and manifest to $VERSION"
         git push --force origin release-$VERSION
 
@@ -223,19 +225,6 @@ jobs:
         asset_path: SHA256SUMS
         asset_name: SHA256SUMS
         asset_content_type: text/plain
-
-    - name: Prepare for main branch update
-      run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git reset --hard
-        git remote update
-        git checkout main
-        git pull --no-edit --no-rebase --strategy-option=theirs origin
-
-    - name: Update main branch with version number in readme
-      run: |
-        sed -i~ "s/VERSION=.*/VERSION=$VERSION/" README.md
 
     - name: Update version in readme on main branch
       run: |
