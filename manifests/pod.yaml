@@ -4,5 +4,5 @@ metadata:
   name: hello
 spec:
   containers:
-    - name: hello
-      image: ghcr.io/halvards/ghcr-actions-test:v0.0.6@sha256:d1badc92e9c1e1a030f926bac540e23e7662f8335c66d4c1a60c955ae6d32062 # kpt-set: ${image}
+  - name: hello
+    image: ko://github.com/halvards/ghcr-actions-test # kpt-set: ${image}
