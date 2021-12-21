@@ -1,0 +1,52 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: skaffold/v2beta26
+kind: Config
+metadata:
+  name: ghcr-actions-test
+build:
+  artifacts:
+  - image: ghcr-actions-test
+    ko:
+      dependencies:
+        paths:
+        - go.mod
+        - '*.go'
+        - pkg
+  tagPolicy:
+    inputDigest: {}
+deploy:
+  kustomize:
+    paths:
+    - manifests
+profiles:
+- name: release
+  patches:
+  - op: add
+    path: /build/artifacts/0/ko/platforms
+    value:
+    - linux/amd64
+    - linux/arm64
+  - op: add
+    path: /build/artifacts/0/ko/labels
+    value:
+      org.opencontainers.image.description: Image description max 512 characters.
+      org.opencontainers.image.licenses: Apache-2.0
+      org.opencontainers.image.revision: '{{.REVISION}}'
+      org.opencontainers.image.source: '{{.SOURCE}}'
+      org.opencontainers.image.title: ghcr-actions-test
+      org.opencontainers.image.url: '{{.URL}}'
+      org.opencontainers.image.vendor: Company LLC
+      org.opencontainers.image.version: '{{.VERSION}}'
