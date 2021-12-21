@@ -150,10 +150,8 @@ jobs:
         skaffold build \
           --build-image ghcr-actions-test \
           --file-output ${{ runner.temp }}/skaffold-artifacts.json \
-          --output '{{range .Builds}}{{ if eq .ImageName "ghcr-actions-test" }}{{.Tag}}{{end}}{{end}}' \
           --profile release \
           --push \
-          --quiet \
           --tag $VERSION >> $GITHUB_ENV
       env:
         SKAFFOLD_DEFAULT_REPO: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}
@@ -165,6 +163,11 @@ jobs:
           --digest-source none \
           --output ghcr-actions-test_manifest.yaml \
           --profile release \
+
+    - name: Get image name
+      run: |
+        echo -n IMAGE_NAME= >> $GITHUB_ENV
+        echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
     - name: Create checksums
       run: shasum -a 256 ghcr-actions-test_* > SHA256SUMS
