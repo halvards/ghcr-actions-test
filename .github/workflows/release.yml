@@ -81,7 +81,7 @@ jobs:
         mkdir -p ${HOME}/.local/bin
         curl -sSL "https://github.com/google/go-containerregistry/releases/download/${GGCR_VERSION}/go-containerregistry_$(uname -s)_$(uname -m).tar.gz" | tar -xzC ${HOME}/.local/bin crane
 
-    name: Install kpt
+    - name: Install kpt
       run: |
         mkdir -p ${HOME}/.local/bin
         curl -sSLo ${HOME}/.local/bin/kpt "https://github.com/GoogleContainerTools/kpt/releases/download/${KPT_VERSION}/kpt_$(go env GOOS)_$(go env GOARCH)"
@@ -155,7 +155,6 @@ jobs:
           --push \
           --quiet \
           --tag $VERSION >> $GITHUB_ENV
-        skaffold render
       env:
         SKAFFOLD_DEFAULT_REPO: ${{ env.REGISTRY }}/${{ env.IMAGE_REPO }}
 
