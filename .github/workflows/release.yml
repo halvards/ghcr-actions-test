@@ -79,20 +79,20 @@ jobs:
 
     - name: Install crane
       run: |
-        mkdir -p ${HOME}/.local/bin
-        curl -sSL "https://github.com/google/go-containerregistry/releases/download/${GGCR_VERSION}/go-containerregistry_$(uname -s)_$(uname -m).tar.gz" | tar -xzC ${HOME}/.local/bin crane
+        mkdir -p $HOME/.local/bin
+        curl -sSL "https://github.com/google/go-containerregistry/releases/download/${GGCR_VERSION}/go-containerregistry_$(uname -s)_$(uname -m).tar.gz" | tar -xzC $HOME/.local/bin crane
 
     - name: Install kustomize
       run: |
-        mkdir -p ${HOME}/.local/bin
-        curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_$(go env GOOS)_$(go env GOARCH).tar.gz" | tar -xzC ${HOME}/.local/bin kustomize
+        mkdir -p $HOME/.local/bin
+        curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_$(go env GOOS)_$(go env GOARCH).tar.gz" | tar -xzC $HOME/.local/bin kustomize
 
     # TODO: Download Skaffold binary (instead of compiling from source) after https://github.com/GoogleContainerTools/skaffold/pull/6944 is included in a release.
     # - name: Install Skaffold
     #   run: |
-    #     mkdir -p ${HOME}/.local/bin
-    #     curl -sSLo ${HOME}/.local/bin/skaffold "https://storage.googleapis.com/skaffold/releases/${SKAFFOLD_VERSION}/skaffold-$(go env GOOS)-$(go env GOARCH)"
-    #     chmod +x ${HOME}/.local/bin/skaffold
+    #     mkdir -p $HOME/.local/bin
+    #     curl -sSLo $HOME/.local/bin/skaffold "https://storage.googleapis.com/skaffold/releases/${SKAFFOLD_VERSION}/skaffold-$(go env GOOS)-$(go env GOARCH)"
+    #     chmod +x $HOME/.local/bin/skaffold
 
     - name: Clone Skaffold Git repo
       run: |
@@ -103,7 +103,7 @@ jobs:
     - name: Build Skaffold from source
       run: |
         git checkout $SKAFFOLD_VERSION
-        go build -o ${HOME}/.local/bin/skaffold ./cmd/skaffold
+        go build -o $HOME/.local/bin/skaffold ./cmd/skaffold
       working-directory: ${{ env.SKAFFOLD_SRC }}
 
     - name: Create release branch
@@ -112,7 +112,7 @@ jobs:
 
     - name: Populate version number in embedded file
       run: |
-        echo "$VERSION" > pkg/version/version.txt
+        echo $VERSION > pkg/version/version.txt
 
     - name: Commit and push to release branch with new version number
       run: |
@@ -144,7 +144,8 @@ jobs:
         skaffold build \
           --file-output ${{ runner.temp }}/skaffold-artifacts.json \
           --profile release \
-          --push
+          --push \
+          --tag $VERSION
       env:
         SKAFFOLD_DEFAULT_REPO: ${{ env.REGISTRY }}/${{ github.repository_owner }}
 
@@ -154,7 +155,7 @@ jobs:
           --build-artifacts ${{ runner.temp }}/skaffold-artifacts.json \
           --digest-source none \
           --output ghcr-actions-test_manifest.yaml \
-          --profile release \
+          --profile release
 
     - name: Get image name with digest
       run: |

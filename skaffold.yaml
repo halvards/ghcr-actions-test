@@ -30,6 +30,8 @@ build:
       ldflags:
       - -s
       - -w
+  tagPolicy:
+    inputDigest: {}
 deploy:
   kustomize:
     paths:
