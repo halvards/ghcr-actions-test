@@ -1,8 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 metadata:
-  name: ghcr-actions-test
   annotations:
-    config.kubernetes.io/local-config: 'true'
+    config.kubernetes.io/local-config: "true"
+  name: ghcr-actions-test
 resources:
 - pod.yaml

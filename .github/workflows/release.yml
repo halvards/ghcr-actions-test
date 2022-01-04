@@ -30,7 +30,6 @@ jobs:
       REGISTRY: ghcr.io
       CGO_ENABLED: '0'
       GGCR_VERSION: v0.7.0
-      KPT_VERSION: v1.0.0-beta.9
       KUSTOMIZE_VERSION: v4.4.1
       SKAFFOLD_VERSION: 524a6b3914101af15fadf2eb3489e578a9c71f78
       SKAFFOLD_CACHE_ARTIFACTS: 'false'
@@ -81,30 +80,25 @@ jobs:
         mkdir -p ${HOME}/.local/bin
         curl -sSL "https://github.com/google/go-containerregistry/releases/download/${GGCR_VERSION}/go-containerregistry_$(uname -s)_$(uname -m).tar.gz" | tar -xzC ${HOME}/.local/bin crane
 
-    - name: Install kpt
-      run: |
-        mkdir -p ${HOME}/.local/bin
-        curl -sSLo ${HOME}/.local/bin/kpt "https://github.com/GoogleContainerTools/kpt/releases/download/${KPT_VERSION}/kpt_$(go env GOOS)_$(go env GOARCH)"
-        chmod +x ${HOME}/.local/bin/kpt
-
     - name: Install kustomize
       run: |
         mkdir -p ${HOME}/.local/bin
         curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_$(go env GOOS)_$(go env GOARCH).tar.gz" | tar -xzC ${HOME}/.local/bin kustomize
 
+    # TODO: Download Skaffold binary (instead of compiling from source) after https://github.com/GoogleContainerTools/skaffold/pull/6944 is included in a release.
     # - name: Install Skaffold
     #   run: |
     #     mkdir -p ${HOME}/.local/bin
     #     curl -sSLo ${HOME}/.local/bin/skaffold "https://storage.googleapis.com/skaffold/releases/${SKAFFOLD_VERSION}/skaffold-$(go env GOOS)-$(go env GOARCH)"
     #     chmod +x ${HOME}/.local/bin/skaffold
 
-    - name: Clone Skaffold
+    - name: Clone Skaffold Git repo
       run: |
         SKAFFOLD_SRC=$(mktemp -d)
         echo SKAFFOLD_SRC=$SKAFFOLD_SRC >> $GITHUB_ENV
         git clone --no-checkout https://github.com/GoogleContainerTools/skaffold.git $SKAFFOLD_SRC
 
-    - name: Build Skaffold
+    - name: Build Skaffold from source
       run: |
         git checkout $SKAFFOLD_VERSION
         go build -o ${HOME}/.local/bin/skaffold ./cmd/skaffold
@@ -126,10 +120,10 @@ jobs:
         git commit -m "Update binary version to $VERSION"
         git push --force origin release-$VERSION
 
-    - name: Set build env vars
+    - name: Set image label env vars
       run: |
         echo REVISION=$(git rev-parse HEAD) >> $GITHUB_ENV
-        echo SOURCE=${{ github.server_url }}/${{ github.repository }} >> $GITHUB_ENV
+        echo SOURCE=${{ github.server_url }}/${{ github.repository }}.git >> $GITHUB_ENV
         echo URL=${{ github.server_url }}/${{ github.repository }} >> $GITHUB_ENV
 
     - name: Set Go flags
@@ -143,9 +137,12 @@ jobs:
         GOOS=linux GOARCH=amd64 go build -o ghcr-actions-test_Linux_x86_64 .
         GOOS=linux GOARCH=arm64 go build -o ghcr-actions-test_Linux_aarch64 .
 
-    - name: Build and push container image
+    - name: Authenticate to container image registry
       run: |
         crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push container image
+      run: |
         skaffold build \
           --build-image ghcr-actions-test \
           --file-output ${{ runner.temp }}/skaffold-artifacts.json \
@@ -163,12 +160,12 @@ jobs:
           --output ghcr-actions-test_manifest.yaml \
           --profile release \
 
-    - name: Get image name
+    - name: Get image name with digest
       run: |
         echo -n IMAGE_NAME= >> $GITHUB_ENV
         echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
-    - name: Create checksums
+    - name: Create checksums file
       run: shasum -a 256 ghcr-actions-test_* > SHA256SUMS
 
     - name: Create release body file
@@ -183,10 +180,8 @@ jobs:
 
     - name: Set image name in Kubernetes resource spec
       run: |
-        kpt fn eval manifests \
-          --image gcr.io/kpt-fn/apply-setters:v0.2 \
-          -- \
-          "image=$IMAGE_NAME"
+        kustomize edit set image ghcr-actions-test=$IMAGE_NAME
+      working-directory: manifests
 
     - name: Update version in readme
       run: |

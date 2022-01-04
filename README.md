@@ -16,18 +16,14 @@ chmod +x ghcr-actions-test
 ./ghcr-actions-test
 ```
 
-## Deploy
+## Deploy using `kubectl`
 
-Deploy the resources to your Kubernetes cluster:
+Deploy the resources to your Kubernetes cluster using `kubectl`:
 
 ```sh
 VERSION=v0.1.0
 
-kpt pkg get https://github.com/halvards/ghcr-actions-test.git/manifests@$VERSION manifests
-
-kpt live init manifests
-
-kpt live apply manifests --reconcile-timeout=3m --output=table
+kubectl apply --kustomize https://github.com/halvards/ghcr-actions-test.git/manifests?ref=$VERSION
 ```
 
 ## Release
