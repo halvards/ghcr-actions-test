@@ -25,6 +25,9 @@ build:
         - go.mod
         - '*.go'
         - pkg
+      ldflags:
+      - -s
+      - -w
   tagPolicy:
     inputDigest: {}
 deploy:
