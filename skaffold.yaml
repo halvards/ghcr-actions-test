@@ -25,11 +25,11 @@ build:
         - go.mod
         - '*.go'
         - pkg
+      flags:
+      - -v
       ldflags:
       - -s
       - -w
-  tagPolicy:
-    inputDigest: {}
 deploy:
   kustomize:
     paths:
