@@ -6,3 +6,7 @@ metadata:
   name: ghcr-actions-test
 resources:
 - pod.yaml
+images:
+- digest: sha256:c01a6126be5c49a71cbc730a7845becd508a4b981b17657efa4850365194cc26
+  name: ghcr-actions-test
+  newName: ghcr.io/halvards/ghcr-actions-test:v0.1.5

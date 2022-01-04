@@ -7,7 +7,7 @@ Experimenting with ghcr and actions.
 Download and run the binary for your platform:
 
 ```sh
-VERSION=v0.1.4
+VERSION=v0.1.5
 
 curl -Lo ghcr-actions-test "https://github.com/halvards/ghcr-actions-test/releases/download/$VERSION/ghcr-actions-test_$(uname -s)_$(uname -m)"
 
@@ -21,7 +21,7 @@ chmod +x ghcr-actions-test
 Deploy the resources to your Kubernetes cluster using `kubectl`:
 
 ```sh
-VERSION=v0.1.4
+VERSION=v0.1.5
 
 kubectl apply --kustomize https://github.com/halvards/ghcr-actions-test.git/manifests?ref=$VERSION
 ```
