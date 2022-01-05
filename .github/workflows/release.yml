@@ -129,9 +129,9 @@ jobs:
         GOOS=linux  GOARCH=arm64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_aarch64 .
 
     - name: Authenticate to container image registry
-      run: |
-        crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
       uses: docker://gcr.io/go-containerregistry/crane:${{ env.GGCR_VERSION }}
+      with:
+        args: auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
 
     - name: Build and push container images
       run: |
@@ -157,9 +157,9 @@ jobs:
         echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
     - name: Update latest tag
-      run: |
-        crane tag $IMAGE_NAME latest
       uses: docker://gcr.io/go-containerregistry/crane:${{ env.GGCR_VERSION }}
+      with:
+        args: tag $IMAGE_NAME latest
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
@@ -185,9 +185,9 @@ jobs:
         EOF
 
     - name: Set image name in Kustomize manifest
-      run: |
-        kustomize edit set image ghcr-actions-test=$IMAGE_NAME
       uses: docker://k8s.gcr.io/kustomize/kustomize:${{ env.KUSTOMIZE_VERSION }}
+      with:
+        args: edit set image ghcr-actions-test=$IMAGE_NAME
       working-directory: manifests
 
     - name: Create kpt setter values file
