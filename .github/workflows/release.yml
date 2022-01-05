@@ -192,8 +192,7 @@ jobs:
     - name: Create kpt setter values file
       uses: actions-hub/kubectl@v1.21.2
       with:
-        args: create configmap setters --from-literal "image=${{ env.IMAGE_NAME }}" --dry-run=client --output yaml > setters.yaml
-      working-directory: manifests
+        args: create configmap setters --from-literal "image=${{ env.IMAGE_NAME }}" --dry-run=client --output yaml > manifests/setters.yaml
 
     - name: Update version in readme
       run: |
