@@ -185,8 +185,9 @@ jobs:
 
     - name: Set image name in Kustomize manifest
       uses: docker://k8s.gcr.io/kustomize/kustomize:v4.4.1
-      with:
-        args: edit set image ghcr-actions-test=$IMAGE_NAME
+      # with:
+      #   args: edit set image ghcr-actions-test=$IMAGE_NAME
+      run: kustomize edit set image "ghcr-actions-test=${{ env.IMAGE_NAME }}"
       working-directory: manifests
 
     - name: Create kpt setter values file
