@@ -31,7 +31,6 @@ jobs:
       CGO_ENABLED: '0'
       COSIGN_VERSION: v1.4.1
       GGCR_VERSION: v0.7.0
-      KPT_VERSION: v1.0.0-beta.10
       KUSTOMIZE_VERSION: v4.4.1
       SKAFFOLD_VERSION: 524a6b3914101af15fadf2eb3489e578a9c71f78
       SKAFFOLD_CACHE_ARTIFACTS: 'false'
@@ -129,7 +128,7 @@ jobs:
         GOOS=linux  GOARCH=arm64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_aarch64 .
 
     - name: Authenticate to container image registry
-      uses: docker://gcr.io/go-containerregistry/crane:${{ env.GGCR_VERSION }}
+      uses: docker://gcr.io/go-containerregistry/crane:v0.7.0
       with:
         args: auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
 
@@ -157,7 +156,7 @@ jobs:
         echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
     - name: Update latest tag
-      uses: docker://gcr.io/go-containerregistry/crane:${{ env.GGCR_VERSION }}
+      uses: docker://gcr.io/go-containerregistry/crane:v0.7.0
       with:
         args: tag $IMAGE_NAME latest
 
@@ -185,7 +184,7 @@ jobs:
         EOF
 
     - name: Set image name in Kustomize manifest
-      uses: docker://k8s.gcr.io/kustomize/kustomize:${{ env.KUSTOMIZE_VERSION }}
+      uses: docker://k8s.gcr.io/kustomize/kustomize:v4.4.1
       with:
         args: edit set image ghcr-actions-test=$IMAGE_NAME
       working-directory: manifests
