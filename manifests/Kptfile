@@ -1,9 +1,9 @@
 apiVersion: kpt.dev/v1
 kind: Kptfile
 metadata:
+  name: ghcr-actions-test
   annotations:
     config.kubernetes.io/local-config: "true"
-  name: ghcr-actions-test
 info:
   description: Experimenting with ghcr and actions.
 pipeline:

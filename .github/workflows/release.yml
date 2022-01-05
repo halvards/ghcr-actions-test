@@ -79,6 +79,16 @@ jobs:
       run: |
         go test -v -count=1 -short -timeout=3m -vet=asmdecl,assign,atomic,bools,buildtag,cgocall,composites,copylocks,errorsas,httpresponse,loopclosure,lostcancel,nilfunc,printf,shift,stdmethods,structtag,tests,unmarshal,unreachable,unsafeptr,unusedresult ./...
 
+    - name: Install crane
+      run: |
+        mkdir -p $HOME/.local/bin
+        curl -sSL "https://github.com/google/go-containerregistry/releases/download/${GGCR_VERSION}/go-containerregistry_$(uname -s)_$(uname -m).tar.gz" | tar -xzC $HOME/.local/bin crane
+
+    - name: Install kustomize
+      run: |
+        mkdir -p $HOME/.local/bin
+        curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_$(go env GOOS)_$(go env GOARCH).tar.gz" | tar -xzC $HOME/.local/bin kustomize
+
     # TODO: Download Skaffold binary (instead of compiling from source) after https://github.com/GoogleContainerTools/skaffold/pull/6944 is included in a release.
     # - name: Install Skaffold
     #   run: |
@@ -128,9 +138,8 @@ jobs:
         GOOS=linux  GOARCH=arm64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_aarch64 .
 
     - name: Authenticate to container image registry
-      uses: docker://gcr.io/go-containerregistry/crane:v0.7.0
-      with:
-        args: auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
+      run: |
+        crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
 
     - name: Build and push container images
       run: |
@@ -156,9 +165,8 @@ jobs:
         echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
     - name: Update latest tag
-      uses: docker://gcr.io/go-containerregistry/crane:v0.7.0
-      with:
-        args: tag $IMAGE_NAME latest
+      run: |
+        crane tag $IMAGE_NAME latest
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
@@ -184,10 +192,8 @@ jobs:
         EOF
 
     - name: Set image name in Kustomize manifest
-      uses: docker://k8s.gcr.io/kustomize/kustomize:v4.4.1
-      # with:
-      #   args: edit set image ghcr-actions-test=$IMAGE_NAME
-      run: kustomize edit set image "ghcr-actions-test=${{ env.IMAGE_NAME }}"
+      run: |
+        kustomize edit set image "ghcr-actions-test=$IMAGE_NAME"
       working-directory: manifests
 
     - name: Create kpt setter values file
