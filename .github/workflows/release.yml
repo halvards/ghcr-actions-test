@@ -31,6 +31,7 @@ jobs:
       CGO_ENABLED: '0'
       COSIGN_VERSION: v1.4.1
       GGCR_VERSION: v0.7.0
+      KPT_VERSION: v1.0.0-beta.10
       KUSTOMIZE_VERSION: v4.4.1
       SKAFFOLD_VERSION: 524a6b3914101af15fadf2eb3489e578a9c71f78
       SKAFFOLD_CACHE_ARTIFACTS: 'false'
@@ -49,14 +50,16 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Setup Go
-      uses: actions/setup-go@v1
+      uses: actions/setup-go@v2
       with:
         go-version: 1.17
 
     - name: Restore dependency cache
       uses: actions/cache@v2
       with:
-        path: ~/go/pkg/mod
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
@@ -76,16 +79,6 @@ jobs:
     - name: Run unit tests
       run: |
         go test -v -count=1 -short -timeout=3m -vet=asmdecl,assign,atomic,bools,buildtag,cgocall,composites,copylocks,errorsas,httpresponse,loopclosure,lostcancel,nilfunc,printf,shift,stdmethods,structtag,tests,unmarshal,unreachable,unsafeptr,unusedresult ./...
-
-    - name: Install crane
-      run: |
-        mkdir -p $HOME/.local/bin
-        curl -sSL "https://github.com/google/go-containerregistry/releases/download/${GGCR_VERSION}/go-containerregistry_$(uname -s)_$(uname -m).tar.gz" | tar -xzC $HOME/.local/bin crane
-
-    - name: Install kustomize
-      run: |
-        mkdir -p $HOME/.local/bin
-        curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_$(go env GOOS)_$(go env GOARCH).tar.gz" | tar -xzC $HOME/.local/bin kustomize
 
     # TODO: Download Skaffold binary (instead of compiling from source) after https://github.com/GoogleContainerTools/skaffold/pull/6944 is included in a release.
     # - name: Install Skaffold
@@ -138,6 +131,7 @@ jobs:
     - name: Authenticate to container image registry
       run: |
         crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
+      uses: docker://gcr.io/go-containerregistry/crane:${{ env.GGCR_VERSION }}
 
     - name: Build and push container images
       run: |
@@ -165,6 +159,7 @@ jobs:
     - name: Update latest tag
       run: |
         crane tag $IMAGE_NAME latest
+      uses: docker://gcr.io/go-containerregistry/crane:${{ env.GGCR_VERSION }}
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
@@ -189,9 +184,16 @@ jobs:
             $IMAGE_NAME
         EOF
 
-    - name: Set image name in Kubernetes resource spec
+    - name: Set image name in Kustomize manifest
       run: |
         kustomize edit set image ghcr-actions-test=$IMAGE_NAME
+      uses: docker://k8s.gcr.io/kustomize/kustomize:${{ env.KUSTOMIZE_VERSION }}
+      working-directory: manifests
+
+    - name: Create kpt setter values file
+      uses: actions-hub/kubectl@v1.21.2
+      with:
+        args: create configmap setters --from-literal "image=${{ env.IMAGE_NAME }}" --dry-run=client --output yaml > setters.yaml
       working-directory: manifests
 
     - name: Update version in readme
