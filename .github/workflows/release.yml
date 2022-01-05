@@ -138,8 +138,11 @@ jobs:
         GOOS=linux  GOARCH=arm64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_aarch64 .
 
     - name: Authenticate to container image registry
-      run: |
-        crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
+      uses: docker://gcr.io/go-containerregistry/crane:debug
+      with:
+        args: auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
+      # run: |
+      #   crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
 
     - name: Build and push container images
       run: |
@@ -196,10 +199,16 @@ jobs:
         kustomize edit set image "ghcr-actions-test=$IMAGE_NAME"
       working-directory: manifests
 
-    - name: Create kpt setter values file
-      uses: actions-hub/kubectl@v1.21.2
-      with:
-        args: create configmap setters --from-literal "image=${{ env.IMAGE_NAME }}" --dry-run=client --output yaml > manifests/setters.yaml
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v2.0
+
+    - name: Update kpt setter values file
+      run: |
+        tmpfile=$(mktemp)
+        kubectl patch --dry-run=client --filename setters.yaml --local=true --output yaml --patch "{\"data\":{\"imag
+e\":\"$IMAGE_NAME\"}}" > $tmpfile
+        mv $tmpfile setters.yaml
+      working-directory: manifests
 
     - name: Update version in readme
       run: |
