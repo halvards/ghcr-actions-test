@@ -109,12 +109,10 @@ jobs:
       working-directory: ${{ env.SKAFFOLD_SRC }}
 
     - name: Create release branch
-      run: |
-        git checkout -B release-$VERSION
+      run: git checkout -B release-$VERSION
 
     - name: Populate version number in embedded file
-      run: |
-        echo $VERSION > pkg/version/version.txt
+      run: echo $VERSION > pkg/version/version.txt
 
     - name: Commit and push to release branch with new version number
       run: |
@@ -138,8 +136,7 @@ jobs:
         GOOS=linux  GOARCH=arm64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_aarch64 .
 
     - name: Authenticate to container image registry
-      run: |
-        crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
+      run: crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
 
     - name: Build and push container images
       run: |
@@ -165,8 +162,7 @@ jobs:
         echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
     - name: Update latest tag
-      run: |
-        crane tag $IMAGE_NAME latest
+      run: crane tag $IMAGE_NAME latest
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
@@ -192,21 +188,24 @@ jobs:
         EOF
 
     - name: Set image name in Kustomize manifest
-      run: |
-        kustomize edit set image "ghcr-actions-test=$IMAGE_NAME"
+      run: kustomize edit set image "ghcr-actions-test=$IMAGE_NAME"
       working-directory: manifests
 
     - name: Update kpt setter values file
       run: |
         tmpfile=$(mktemp)
-        kubectl patch --dry-run=client --filename setters.yaml --local=true --output yaml --patch '{"data":{"imag
-e":"${{ env.IMAGE_NAME }}"}}' > $tmpfile
+        kubectl patch \
+          --dry-run=client \
+          --filename setters.yaml \
+          --local \
+          --output yaml \
+          --patch '{"data":{"image":"${{ env.IMAGE_NAME }}"}}' \
+          > $tmpfile
         mv $tmpfile setters.yaml
       working-directory: manifests
 
     - name: Update version in readme
-      run: |
-        sed -i~ "s/VERSION=.*/VERSION=$VERSION/" README.md
+      run: sed -i~ "s/VERSION=.*/VERSION=$VERSION/" README.md
 
     - name: Commit and push to release branch with new version and image ref
       run: |
@@ -217,8 +216,7 @@ e":"${{ env.IMAGE_NAME }}"}}' > $tmpfile
         git push --force origin release-$VERSION
 
     - name: Set release env vars
-      run: |
-        echo COMMITISH=$(git rev-parse HEAD) >> $GITHUB_ENV
+      run: echo COMMITISH=$(git rev-parse HEAD) >> $GITHUB_ENV
 
     - name: Create release
       id: create_release
