@@ -200,7 +200,7 @@ jobs:
       run: |
         tmpfile=$(mktemp)
         kubectl patch --dry-run=client --filename setters.yaml --local=true --output yaml --patch '{"data":{"imag
-e":"${{ env.IMAGE_NAME "}}' > $tmpfile
+e":"${{ env.IMAGE_NAME }}"}}' > $tmpfile
         mv $tmpfile setters.yaml
       working-directory: manifests
 
