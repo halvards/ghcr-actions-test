@@ -138,11 +138,8 @@ jobs:
         GOOS=linux  GOARCH=arm64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_aarch64 .
 
     - name: Authenticate to container image registry
-      uses: docker://gcr.io/go-containerregistry/crane:debug
-      with:
-        args: auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
-      # run: |
-      #   crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
+      run: |
+        crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
 
     - name: Build and push container images
       run: |
