@@ -29,10 +29,10 @@ jobs:
     env:
       REGISTRY: ghcr.io
       CGO_ENABLED: '0'
-      COSIGN_VERSION: v1.4.1
-      GGCR_VERSION: v0.7.0
-      KUSTOMIZE_VERSION: v4.4.1
-      SKAFFOLD_VERSION: 524a6b3914101af15fadf2eb3489e578a9c71f78
+      COSIGN_VERSION: v1.7.2
+      GGCR_VERSION: v0.8.0
+      KUSTOMIZE_VERSION: v4.5.4
+      SKAFFOLD_VERSION: v1.38.0
       SKAFFOLD_CACHE_ARTIFACTS: 'false'
       SKAFFOLD_DETECT_MINIKUBE: 'false'
       SKAFFOLD_INTERACTIVE: 'false'
@@ -89,24 +89,11 @@ jobs:
         mkdir -p $HOME/.local/bin
         curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_$(go env GOOS)_$(go env GOARCH).tar.gz" | tar -xzC $HOME/.local/bin kustomize
 
-    # TODO: Download Skaffold binary (instead of compiling from source) after https://github.com/GoogleContainerTools/skaffold/pull/6944 is included in a release.
-    # - name: Install Skaffold
-    #   run: |
-    #     mkdir -p $HOME/.local/bin
-    #     curl -sSLo $HOME/.local/bin/skaffold "https://storage.googleapis.com/skaffold/releases/${SKAFFOLD_VERSION}/skaffold-$(go env GOOS)-$(go env GOARCH)"
-    #     chmod +x $HOME/.local/bin/skaffold
-
-    - name: Clone Skaffold Git repo
+    - name: Install Skaffold
       run: |
-        SKAFFOLD_SRC=$(mktemp -d)
-        echo SKAFFOLD_SRC=$SKAFFOLD_SRC >> $GITHUB_ENV
-        git clone --no-checkout https://github.com/GoogleContainerTools/skaffold.git $SKAFFOLD_SRC
-
-    - name: Build Skaffold from source
-      run: |
-        git checkout $SKAFFOLD_VERSION
-        go build -o $HOME/.local/bin/skaffold ./cmd/skaffold
-      working-directory: ${{ env.SKAFFOLD_SRC }}
+        mkdir -p $HOME/.local/bin
+        curl -sSLo $HOME/.local/bin/skaffold "https://storage.googleapis.com/skaffold/releases/${SKAFFOLD_VERSION}/skaffold-$(go env GOOS)-$(go env GOARCH)"
+        chmod +x $HOME/.local/bin/skaffold
 
     - name: Create release branch
       run: git checkout -B release-$VERSION

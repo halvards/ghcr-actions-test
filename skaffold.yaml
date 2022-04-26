@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: skaffold/v2beta26
+apiVersion: skaffold/v2beta28
 kind: Config
 metadata:
   name: ghcr-actions-test
@@ -40,14 +40,15 @@ profiles:
 - name: release
   patches:
   - op: add
-    path: /build/artifacts/0/ko/platforms
+    path: /build/artifacts/0/platforms
     value:
     - linux/amd64
     - linux/arm64
   - op: add
     path: /build/artifacts/0/ko/labels
     value:
-      org.opencontainers.image.description: Image description max 512 characters.
+      org.opencontainers.image.description: >-
+        Image description max 512 characters.
       org.opencontainers.image.licenses: Apache-2.0
       org.opencontainers.image.revision: '{{.REVISION}}'
       org.opencontainers.image.source: '{{.SOURCE}}'
