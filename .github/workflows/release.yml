@@ -122,19 +122,16 @@ jobs:
         GOOS=linux  GOARCH=amd64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_x86_64 .
         GOOS=linux  GOARCH=arm64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_aarch64 .
 
-    # - name: Authenticate to container image registry
-    #   run: crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
-
     - name: Build and push container images
       run: |
         skaffold build \
+          --default-repo ${{ env.REGISTRY }}/${{ github.repository_owner }} \
           --file-output ${{ runner.temp }}/skaffold-artifacts.json \
           --profile release \
           --push \
           --tag $VERSION
       env:
         GITHUB_TOKEN: ${{ github.token }}
-        SKAFFOLD_DEFAULT_REPO: ${{ env.REGISTRY }}/${{ github.repository_owner }}
 
     - name: Render release manifest
       run: |
@@ -151,6 +148,8 @@ jobs:
 
     - name: Update latest tag
       run: crane tag $IMAGE_NAME latest
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
