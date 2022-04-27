@@ -1,8 +1,8 @@
 apiVersion: v1
 data:
-  image: ghcr.io/halvards/ghcr-actions-test
+  image: ghcr.io/halvards/ghcr-actions-test:v0.1.8@sha256:28ff078daf30addde861fc7ff9eed306987641c797cc291bbd53fe2dbfcfac4f
 kind: ConfigMap
 metadata:
-  name: setters
   annotations:
     config.kubernetes.io/local-config: "true"
+  name: setters
