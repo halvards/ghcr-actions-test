@@ -146,10 +146,12 @@ jobs:
         echo -n IMAGE_NAME= >> $GITHUB_ENV
         echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
+    # Skip this step and add `GITHUB_TOKEN` as an env variable to the `crane tag` step after `crane` adds github.Keychain (> v0.8.0)
+    - name: Authenticate to container image registry
+      run: crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
+
     - name: Update latest tag
       run: crane tag $IMAGE_NAME latest
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
