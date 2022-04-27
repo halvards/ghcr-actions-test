@@ -7,7 +7,7 @@ Experimenting with ghcr and actions.
 Download and run the binary for your platform:
 
 ```sh
-VERSION=v0.1.7
+VERSION=v0.1.8
 
 curl -Lo ghcr-actions-test "https://github.com/halvards/ghcr-actions-test/releases/download/${VERSION}/ghcr-actions-test_$(uname -s)_$(uname -m)"
 
@@ -22,7 +22,7 @@ Render manifests from the [`manifests`](./manifests) directory, and apply the
 resources to your Kubernetes cluster using `kubectl`:
 
 ```sh
-VERSION=v0.1.7
+VERSION=v0.1.8
 
 kubectl apply --kustomize "https://github.com/halvards/ghcr-actions-test.git/manifests?ref=${VERSION}"
 ```
@@ -32,7 +32,7 @@ kubectl apply --kustomize "https://github.com/halvards/ghcr-actions-test.git/man
 Apply a pre-rendered manifest from a GitHub release:
 
 ```sh
-VERSION=v0.1.7
+VERSION=v0.1.8
 
 kubectl apply --filename "https://github.com/halvards/ghcr-actions-test/releases/download/${VERSION}/ghcr-actions-test_manifest.yaml"
 ```
@@ -42,7 +42,7 @@ kubectl apply --filename "https://github.com/halvards/ghcr-actions-test/releases
 Fetch the manifest package using `kpt`:
 
 ```sh
-VERSION=v0.1.7
+VERSION=v0.1.8
 
 kpt pkg get "https://github.com/halvards/ghcr-actions-test.git/manifests@${VERSION}" manifests
 ```
