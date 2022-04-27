@@ -122,13 +122,17 @@ jobs:
         GOOS=linux  GOARCH=amd64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_x86_64 .
         GOOS=linux  GOARCH=arm64 go build -v -trimpath -ldflags="-s -w" -o ghcr-actions-test_Linux_aarch64 .
 
+    # - name: Authenticate to container image registry
+    #   run: crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
+
     - name: Build and push container images
       run: |
         skaffold build \
           --file-output ${{ runner.temp }}/skaffold-artifacts.json \
           --profile release \
           --push \
-          --tag $VERSION
+          --tag $VERSION \
+          --verbosity debug
       env:
         SKAFFOLD_DEFAULT_REPO: ${{ env.REGISTRY }}/${{ github.repository_owner }}
 
