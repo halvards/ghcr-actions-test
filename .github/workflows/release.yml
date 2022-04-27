@@ -131,9 +131,9 @@ jobs:
           --file-output ${{ runner.temp }}/skaffold-artifacts.json \
           --profile release \
           --push \
-          --tag $VERSION \
-          --verbosity debug
+          --tag $VERSION
       env:
+        GITHUB_TOKEN: ${{ github.token }}
         SKAFFOLD_DEFAULT_REPO: ${{ env.REGISTRY }}/${{ github.repository_owner }}
 
     - name: Render release manifest
