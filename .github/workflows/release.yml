@@ -29,10 +29,10 @@ jobs:
     env:
       REGISTRY: ghcr.io
       CGO_ENABLED: '0'
-      COSIGN_VERSION: v1.7.2
-      GGCR_VERSION: v0.8.0
-      KUSTOMIZE_VERSION: v4.5.4
-      SKAFFOLD_VERSION: v1.38.0
+      COSIGN_VERSION: v1.13.0
+      GGCR_VERSION: v0.11.0
+      KUSTOMIZE_VERSION: v4.5.7
+      SKAFFOLD_VERSION: v1.39.2
       SKAFFOLD_CACHE_ARTIFACTS: 'false'
       SKAFFOLD_DETECT_MINIKUBE: 'false'
       SKAFFOLD_INTERACTIVE: 'false'
@@ -51,7 +51,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v2
       with:
-        go-version: 1.17
+        go-version: 1.19
 
     - name: Restore dependency cache
       uses: actions/cache@v2
