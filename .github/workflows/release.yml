@@ -51,7 +51,17 @@ jobs:
       uses: actions/setup-go@v3
       with:
         go-version-file: go.mod
-        cache: true
+        cache: false # use actions/cache instead
+
+    - name: Restore dependency cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.mod') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
 
     - name: Set image env vars
       run: |
