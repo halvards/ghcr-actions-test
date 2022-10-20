@@ -31,8 +31,7 @@ jobs:
       CGO_ENABLED: '0'
       COSIGN_VERSION: v1.13.0
       GGCR_VERSION: v0.11.0
-      KUSTOMIZE_VERSION: v4.5.7
-      SKAFFOLD_VERSION: v1.39.2
+      SKAFFOLD_VERSION: v2.0.0-beta3
       SKAFFOLD_CACHE_ARTIFACTS: 'false'
       SKAFFOLD_DETECT_MINIKUBE: 'false'
       SKAFFOLD_INTERACTIVE: 'false'
@@ -46,22 +45,13 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Setup Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
-        go-version: 1.19
-
-    - name: Restore dependency cache
-      uses: actions/cache@v2
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
+        go-version-file: go.mod
+        cache: true
 
     - name: Set image env vars
       run: |
@@ -83,11 +73,6 @@ jobs:
       run: |
         mkdir -p $HOME/.local/bin
         curl -sSL "https://github.com/google/go-containerregistry/releases/download/${GGCR_VERSION}/go-containerregistry_$(uname -s)_$(uname -m).tar.gz" | tar -xzC $HOME/.local/bin crane
-
-    - name: Install kustomize
-      run: |
-        mkdir -p $HOME/.local/bin
-        curl -sSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2F${KUSTOMIZE_VERSION}/kustomize_${KUSTOMIZE_VERSION}_$(go env GOOS)_$(go env GOARCH).tar.gz" | tar -xzC $HOME/.local/bin kustomize
 
     - name: Install Skaffold
       run: |
@@ -146,12 +131,10 @@ jobs:
         echo -n IMAGE_NAME= >> $GITHUB_ENV
         echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
-    # Skip this step and add `GITHUB_TOKEN` as an env variable to the `crane tag` step after `crane` adds github.Keychain (> v0.8.0)
-    - name: Authenticate to container image registry
-      run: crane auth login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ github.token }}
-
     - name: Update latest tag
       run: crane tag $IMAGE_NAME latest
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
@@ -176,21 +159,17 @@ jobs:
             $IMAGE_NAME
         EOF
 
-    - name: Set image name in Kustomize manifest
-      run: kustomize edit set image "ghcr-actions-test=$IMAGE_NAME"
-      working-directory: manifests
-
-    - name: Update kpt setter values file
+    - name: Set image name in deployment manifest
       run: |
         tmpfile=$(mktemp)
         kubectl patch \
           --dry-run=client \
-          --filename setters.yaml \
+          --filename deployment.yaml \
           --local \
           --output yaml \
-          --patch '{"data":{"image":"${{ env.IMAGE_NAME }}"}}' \
+          --patch '{"spec":{"template":{"spec":{"containers":[{"name":"hello","image":"${{ env.IMAGE_NAME }}"}]}}}}" \
           > $tmpfile
-        mv $tmpfile setters.yaml
+        mv $tmpfile deployment.yaml
       working-directory: manifests
 
     - name: Update version in readme
