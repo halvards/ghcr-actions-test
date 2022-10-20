@@ -12,7 +12,7 @@ spec:
         app: hello
     spec:
       containers:
-      - name: hello
-        image: ghcr-actions-test # kpt-set: ${image}
+      - image: ghcr.io/halvards/ghcr-actions-test:v0.1.11@sha256:661a67960961dde1e05d8e6c9a9d7eca1d595cbd19825c398382d99d97ee5bd2
+        name: hello
         ports:
         - containerPort: 8080
