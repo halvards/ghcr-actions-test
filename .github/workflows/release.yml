@@ -141,8 +141,16 @@ jobs:
         echo -n IMAGE_NAME= >> $GITHUB_ENV
         echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
+#    - name: Update latest tag
+#      run: krane tag $IMAGE_NAME latest
+#      env:
+#        GITHUB_TOKEN: ${{ github.token }}
+
     - name: Update latest tag
-      run: krane tag $IMAGE_NAME latest
+      args:
+      - tag
+      - ${{ env.IMAGE_NAME }}
+      - latest
       env:
         GITHUB_TOKEN: ${{ github.token }}
       uses: docker://gcr.io/go-containerregistry/krane:${{ env.GGCR_VERSION }}
