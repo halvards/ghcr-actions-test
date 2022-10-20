@@ -155,7 +155,7 @@ jobs:
       run: cosign sign --force --recursive --upload $IMAGE_NAME
       env:
         COSIGN_EXPERIMENTAL: 1
-        GITHUB_TOKEN: ${{ github.token }}
+        COSIGN_PASSWORD: ${{ github.token }}
 
     - name: Create checksums file
       run: shasum -a 256 ghcr-actions-test_* > SHA256SUMS
