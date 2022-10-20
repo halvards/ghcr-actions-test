@@ -29,8 +29,8 @@ jobs:
     env:
       REGISTRY: ghcr.io
       CGO_ENABLED: '0'
-      COSIGN_VERSION: v1.13.0
-      GGCR_VERSION: v0.11.0
+      COSIGN_VERSION: v1.13.1
+      GGCR_VERSION: v0.12.0
       SKAFFOLD_VERSION: v2.0.0-beta3
       SKAFFOLD_CACHE_ARTIFACTS: 'false'
       SKAFFOLD_DETECT_MINIKUBE: 'false'
@@ -79,10 +79,10 @@ jobs:
       run: |
         go test -v -count=1 -short -timeout=3m -vet=asmdecl,assign,atomic,bools,buildtag,cgocall,composites,copylocks,errorsas,httpresponse,loopclosure,lostcancel,nilfunc,printf,shift,stdmethods,structtag,tests,unmarshal,unreachable,unsafeptr,unusedresult ./...
 
-#    - name: Install krane
-#      run: |
-#        mkdir -p $HOME/.local/bin
-#        curl -sSL "https://github.com/google/go-containerregistry/releases/download/${GGCR_VERSION}/go-containerregistry_$(uname -s)_$(uname -m).tar.gz" | tar -xzC $HOME/.local/bin krane
+    - name: Install krane
+      run: |
+        mkdir -p $HOME/.local/bin
+        curl -sSL "https://github.com/google/go-containerregistry/releases/download/${GGCR_VERSION}/go-containerregistry_$(uname -s)_$(uname -m).tar.gz" | tar -xzC $HOME/.local/bin krane
 
     - name: Install Skaffold
       run: |
@@ -141,19 +141,10 @@ jobs:
         echo -n IMAGE_NAME= >> $GITHUB_ENV
         echo $(jq -r '.builds[] | select(.imageName=="ghcr-actions-test") | .tag' ${{ runner.temp }}/skaffold-artifacts.json) >> $GITHUB_ENV
 
-#    - name: Update latest tag
-#      run: krane tag $IMAGE_NAME latest
-#      env:
-#        GITHUB_TOKEN: ${{ github.token }}
-
     - name: Update latest tag
-      args:
-      - tag
-      - ${{ env.IMAGE_NAME }}
-      - latest
+      run: krane tag $IMAGE_NAME latest
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      uses: docker://gcr.io/go-containerregistry/krane:${{ env.GGCR_VERSION }}
 
     - name: Install Cosign
       uses: sigstore/cosign-installer@main
