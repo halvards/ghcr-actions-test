@@ -29,17 +29,17 @@ profiles:
     value:
     - linux/amd64
     - linux/arm64
-#  - op: add
-#    path: /build/artifacts/0/ko/labels
-#    value:
-#      org.opencontainers.image.description: Image description max 512 characters.
-#      org.opencontainers.image.licenses: Apache-2.0
-#      org.opencontainers.image.revision: '{{.REVISION}}'
-#      org.opencontainers.image.source: '{{.SOURCE}}'
-#      org.opencontainers.image.title: ghcr-actions-test
-#      org.opencontainers.image.url: '{{.URL}}'
-#      org.opencontainers.image.vendor: Company LLC
-#      org.opencontainers.image.version: '{{.VERSION}}'
+  - op: add
+    path: /build/artifacts/0/ko/labels
+    value:
+      org.opencontainers.image.description: Image description max 512 characters.
+      org.opencontainers.image.licenses: Apache-2.0
+      org.opencontainers.image.revision: '{{.REVISION}}'
+      org.opencontainers.image.source: '{{.SOURCE}}'
+      org.opencontainers.image.title: ghcr-actions-test
+      org.opencontainers.image.url: '{{.URL}}'
+      org.opencontainers.image.vendor: Company LLC
+      org.opencontainers.image.version: '{{.VERSION}}'
   - op: add
     path: /build/artifacts/0/ko/ldflags
     value:
